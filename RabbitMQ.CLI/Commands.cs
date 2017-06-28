@@ -94,27 +94,23 @@ namespace RabbitMQ.CLI
                 VirtualHost = options.VirtualHost
             };
 
-            using (var connection = factory.CreateConnection())
-            {
-                using (var channel = connection.CreateModel())
-                {
-                    channel.QueueDeclare(queue: options.QueueName,
-                        durable: false,
-                        exclusive: false,
-                        autoDelete: false,
-                        arguments: null);
+            var connection = factory.CreateConnection();
+            var channel = connection.CreateModel();
+            channel.QueueDeclare(queue: options.QueueName,
+                durable: false,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null);
 
-                    var consumer = new EventingBasicConsumer(channel);
-                    consumer.Received += (model, e) =>
-                    {
-                        var message = Encoding.UTF8.GetString(e.Body);
-                        Console.WriteLine("Received: {0}", message);
-                    };
-                    channel.BasicConsume(queue: options.QueueName,
-                        autoAck: true,
-                        consumer: consumer);
-                }
-            }
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += (model, e) =>
+            {
+                var message = Encoding.UTF8.GetString(e.Body);
+                Console.WriteLine("Received: {0}", message);
+            };
+            channel.BasicConsume(queue: options.QueueName,
+                autoAck: true,
+                consumer: consumer);
 
             return 0;
         }
